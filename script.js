@@ -130,7 +130,7 @@ const updateUi = function (acc) {
 };
 
 //Event Handlers
-let currentAccount;
+let currentAccount, timer;
 
 btnLogin.addEventListener('click', function (e) {
   //Prevent form from submitting
@@ -154,6 +154,9 @@ btnLogin.addEventListener('click', function (e) {
     inputLoginPin.blur();
     //Update UI
     updateUi(currentAccount);
+    if (timer) clearInterval(timer);
+
+    timer = startLogOutTimer();
   }
 });
 
@@ -206,7 +209,7 @@ btnClose.addEventListener('click', function (e) {
     const index = accounts.findIndex(
       acc => acc.username === currentAccount.username
     );
-    console.log(index);
+    // console.log(index);
     //Delete account
     accounts.splice(index, 1);
     //Hide Ui
@@ -214,8 +217,46 @@ btnClose.addEventListener('click', function (e) {
   }
   //Hiding form cursor
   inputCloseUsername.value = inputClosePin.value = '';
+  labelWelcome.textContent = 'Log in to get started';
   inputClosePin.blur();
 });
+//TIMEOUT
+const startLogOutTimer = function () {
+  // 3.
+  // There is always this 1s delay after the app loads and the start of the timer. And also between logins. So let's export the timer callback into its own function, and run it right away
+  const tick = function () {
+    let minutes = String(parseInt(time / 60, 10)).padStart(2, '0');
+    let seconds = String(parseInt(time % 60, 10)).padStart(2, '0');
+    // console.log(minutes, seconds);
+
+    // Displaying time in element and clock
+    labelTimer.textContent = `${minutes}:${seconds}`;
+
+    // Finish timer
+    if (time === 0) {
+      // We need to finish the timer, otherwise it will run forever
+      clearInterval(timer);
+
+      // We log out the user, which means to fade out the app
+      containerApp.style.opacity = 0;
+      labelWelcome.textContent = 'Log in to get started';
+    }
+
+    // Subtract 1 second from time for the next iteration
+    time--;
+  };
+
+  // Setting time to 5 minutes in seconds
+  let time = 0.2 * 60;
+  // let time = 10;
+
+  tick();
+  const timer = setInterval(tick, 1000);
+
+  // LATER
+  return timer;
+};
+//LOGGING OUT
 
 let sorted = false;
 btnSort.addEventListener('click', function (e) {
